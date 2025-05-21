@@ -2,33 +2,27 @@ using UnityEngine;
 
 public class MissileHoming : MonoBehaviour
 {
-    public float speed = 20f;               // 전진 속도
-    public float rotateSpeed = 5f;          // 회전 속도
+    public float speed = 20f;          
+    public float rotateSpeed = 5f;     
     private Transform target;
 
     void Start()
     {
-        // "Target" 태그가 붙은 오브젝트를 찾음
-        GameObject targetObj = GameObject.FindGameObjectWithTag("Target");
-        if (targetObj != null)
-        {
-            target = targetObj.transform;
-            Debug.Log(target.name + " found and assigned as target.");
-        }
+        var tgt = GameObject.FindGameObjectWithTag("Target");
+        if (tgt) target = tgt.transform;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (target == null) return;
 
-        // 1. 타겟 방향 계산
-        Vector3 direction = (target.position - transform.position).normalized;
+        // 1) 천천히 회전
+        Vector3 dir     = (target.position - transform.position).normalized;
+        Quaternion dstR = Quaternion.LookRotation(dir);
+        transform.rotation = Quaternion.Slerp(transform.rotation, dstR, rotateSpeed * Time.fixedDeltaTime);
 
-        // 2. 회전 방향 보간 (자연스럽게 회전)
-        Quaternion toRotation = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Lerp(transform.rotation, toRotation, rotateSpeed * Time.deltaTime);
-
-        // 3. 앞으로 전진
-        transform.Translate(Vector3.forward * speed * Time.deltaTime);
+        // 2) 고정 속도로 전진
+        Vector3 move = transform.forward * speed * Time.fixedDeltaTime;
+        transform.position += move;
     }
 }
