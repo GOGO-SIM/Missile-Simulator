@@ -25,9 +25,13 @@ public class SensingIMU : MonoBehaviour
         Debug.Log($"[SensingIMU] Sending IMU data to {remoteIP}:{remotePort}");
     }
 
+    private float imuSendInterval = 0.1f; // 100ms
+    private float imuSendTimer = 0f;
+
     void FixedUpdate()
     {
         float dt = Time.fixedDeltaTime;
+        imuSendTimer += dt;
         Vector3 currentPosition = transform.position;
         Quaternion currentRotation = transform.rotation;
         fixedFrameCount++;
@@ -67,12 +71,16 @@ public class SensingIMU : MonoBehaviour
         lastRotation = currentRotation;
 
         // 4) UDP transmission: time, ax, ay, az, gx, gy, gz
-        float t = Time.fixedTime; // Use fixedTime to match FixedUpdate intervals
-        string msg = string.Format("{0:F3},{1:F4},{2:F4},{3:F4},{4:F4},{5:F4},{6:F4}",
-            t, localAccel.x, localAccel.y, localAccel.z,
-            localGyro.x, localGyro.y, localGyro.z);
-        byte[] data = Encoding.UTF8.GetBytes(msg);
-        udpClient.Send(data, data.Length, endPoint);
+        if (imuSendTimer >= imuSendInterval)
+        {
+            imuSendTimer = 0f;
+            float t = Time.fixedTime;
+            string msg = string.Format("{0:F3},{1:F4},{2:F4},{3:F4},{4:F4},{5:F4},{6:F4}",
+                t, localAccel.x, localAccel.y, localAccel.z,
+                localGyro.x, localGyro.y, localGyro.z);
+            byte[] data = Encoding.UTF8.GetBytes(msg);
+            udpClient.Send(data, data.Length, endPoint);
+        }
     }
 
     void OnDestroy()
