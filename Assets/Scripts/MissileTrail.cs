@@ -14,8 +14,6 @@ public class MissileTrail : MonoBehaviour
     {
         lineRenderer = GetComponent<LineRenderer>();
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-        lineRenderer.startColor = Color.red;
-        lineRenderer.endColor = Color.red;
         lineRenderer.widthMultiplier = 0.3f;
         lineRenderer.positionCount = 0;
 
